@@ -219,4 +219,3 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-postgresql://faiz:6nqada1udKLsX8u0qLgQ0OHZHDPqrjFJ@dpg-dbi728m1egvs73f3j130-a.oregon-postgres.render.com/agent_memory_znez
