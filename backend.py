@@ -99,6 +99,8 @@ Hotel Results:
 {state['hotel_results']}
 
 Make the itinerary practical, budget-aware, and easy to follow.
+Use ONLY flights, hotels and prices present in the results above.
+If a price is not in the data, write "price not available" or label it "AI estimate".
 """
 
     response = llm.invoke([
@@ -115,25 +117,36 @@ Make the itinerary practical, budget-aware, and easy to follow.
 
 def final_agent(state: TravelState):
     prompt = f"""
-Generate a final travel plan based on the following information:
-user_query: {state['user_query']}
-Flight Results: {state['flight_results']}
-Hotel Results: {state['hotel_results']}
-itinerary: {state['itinerary']}
+Write a final travel plan based on the following information:
 
-Format the output as a JSON object with the following keys:
-1. Trip summary
-2. Flight details
-3. Hotel details
-4. day-wise itinerary
-5. estimated budget
-6. final recommendations
+User request: {state['user_query']}
 
-Important:
-- Be concise and clear in your responses.
-- Ensure the JSON is valid and properly formatted.
-- Mention the live flight API may not provide ticket prices if the prices are not available.
-- Keep the response useful for real travel planning, including practical tips and advice.
+Flight results:
+{state['flight_results']}
+
+Hotel results:
+{state['hotel_results']}
+
+Itinerary draft:
+{state['itinerary']}
+
+Write the answer as clean, readable plain text with these sections, in this order:
+
+TRIP SUMMARY
+FLIGHT DETAILS
+HOTEL DETAILS
+DAY-WISE ITINERARY
+ESTIMATED BUDGET
+FINAL RECOMMENDATIONS
+
+Rules:
+- Do NOT use JSON, code blocks, or markdown symbols like ** or ##.
+- Put each section title on its own line in CAPITAL LETTERS, followed by a blank line.
+- Use short lines starting with "- " for lists.
+- Use ONLY flights, hotels and prices present in the results above.
+- If a price is not in the data, write "price not available" or label it "AI estimate".
+- State that the live flight API may not provide ticket prices.
+- Be concise and practical.
 """
 
     response = llm.invoke([
