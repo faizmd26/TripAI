@@ -2,6 +2,7 @@ import os
 import uuid
 import operator
 from typing import TypedDict, Annotated
+import asyncio
 
 import certifi
 import psycopg
@@ -23,8 +24,10 @@ from langchain_core.messages import (
 )
 from langchain_groq import ChatGroq
 
-from tools.tavilty_tool import tavily_search  # file name kept exactly as in your project
+# from tools.tavilty_tool import tavily_search  # file name kept exactly as in your project
 from tools.flight_tool import search_flights
+from mcp_client_test import tavily_mcp_search
+from mcp_client import tavily_mcp_search, aviation_mcp_call
 
 
 def get_database_url() -> str:
@@ -76,7 +79,8 @@ def flight_agent(state: TravelState):
 
 def hotel_agent(state: TravelState):
     query = state["user_query"]
-    hotel_data = tavily_search(query)
+   #  hotel_data = tavily_search(query)
+    hotel_data = asyncio.run(tavily_mcp_search(query))
 
     return {
         "hotel_results": hotel_data,
