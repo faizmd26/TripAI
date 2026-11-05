@@ -1,6 +1,9 @@
 import os 
 import certifi
 from dotenv import load_dotenv
+# Inside backend.py
+from mcp_client import client
+
 
 load_dotenv()
 
@@ -25,7 +28,7 @@ from langchain_core.messages import (
 from langchain_groq import ChatGroq
 # from tools.tavily_tool import tavily_search
 # from tools.flight_tool import search_flights
-from mcp_client import tavily_mcp_search, aviation_mcp_call, extract_destination, forecast_mcp_search, weather_mcp_search
+from mcp_client import tavily_mcp_search, aviation_mcp_call, extract_destination, forecast_mcp_search, weather_mcp_search, client
 
 
 def get_database_url():
@@ -53,7 +56,7 @@ if not GROQ_API_KEY:
 # =========================
 
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model="openai/gpt-oss-120b",
     api_key=GROQ_API_KEY
 )
 

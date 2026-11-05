@@ -1,7 +1,8 @@
 from pathlib import Path
-import traceback, uvicorn
+import traceback
+import uvicorn
 
-from fastapi import FastAPI, requests, Request
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -9,34 +10,37 @@ from pydantic import BaseModel
 
 from backend import run_travel_agent
 
+# This is to allow nested event loops for async calls in FastAPI
 import nest_asyncio
 nest_asyncio.apply()
 
 
 BASE_DIR = Path(__file__).resolve().parent
 
-app= FastAPI(
-    title="TripAI",
-    description="Langgraph multi agent travel planner",
+app = FastAPI(
+    title="TripMate AI",
+    description="LangGraph Multi-Agent Travel Planner with FastAPI Frontend",
     version="1.0.0"
-
-
 )
+
 
 app.mount(
     "/static",
-    StaticFiles(directory=str(BASE_DIR/"static")),
+    StaticFiles(directory=str(BASE_DIR / "static")),
     name="static"
 )
 
-templates= Jinja2Templates(
-    directory=str(BASE_DIR/"templates")
+
+templates = Jinja2Templates(
+    directory=str(BASE_DIR / "templates")
 )
 
 
+
 class TravelRequest(BaseModel):
-    message:str
+    message: str
     thread_id: str | None = None
+
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -47,6 +51,7 @@ async def home(request: Request):
         context={}
     )
 
+
 @app.post("/api/travel")
 async def travel_planner(request_data: TravelRequest):
     try:
@@ -56,8 +61,8 @@ async def travel_planner(request_data: TravelRequest):
             return JSONResponse(
                 status_code=400,
                 content={
-                    "success":False,
-                    "error":"Message cannot be empty"
+                    "success": False,
+                    "error": "Message cannot be empty."
                 }
             )
 
@@ -68,41 +73,43 @@ async def travel_planner(request_data: TravelRequest):
 
         return JSONResponse(
             content={
-                "success":True,
+                "success": True,
                 "thread_id": result["thread_id"],
                 "answer": result["answer"],
                 "flight_results": result["flight_results"],
                 "hotel_results": result["hotel_results"],
                 "itinerary": result["itinerary"],
                 "llm_calls": result["llm_calls"],
-        
-
             }
         )
 
     except Exception as e:
-        print("ERROR:",e)
+        print("ERROR:", e)
         traceback.print_exc()
-
 
         return JSONResponse(
             status_code=500,
             content={
-                "success":False,
+                "success": False,
                 "error": str(e)
             }
         )
+
+
 
 @app.get("/health")
 async def health_check():
     return {
         "status": "ok",
-        "message": "AI Travel Planner APi is running "
+        "message": "AI Travel Planner API is running"
     }
+
 
 @app.get("/favicon.ico")
 async def favicon():
     return JSONResponse(content={})
+
+
 
 if __name__ == "__main__":
     uvicorn.run(
@@ -110,6 +117,4 @@ if __name__ == "__main__":
         host="127.0.0.1",
         port=8000,
         reload=True
-
     )
-
