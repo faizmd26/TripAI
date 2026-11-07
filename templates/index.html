@@ -3,134 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trip AI</title>
+  <meta name="theme-color" content="#f6f7f9">
+  <title>TripMate AI</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a7f8c'/%3E%3Cpath d='M7 15.5l18-8-8 18-2.2-7.8z' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="page-bg">
-    <div class="gradient-circle circle-1"></div>    
-    <div class="gradient-circle circle-2"></div>
-    <div class="gradient-circle circle-3"></div>
-  </div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="TripMate AI home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l18-8-8 18-2-8z"/></svg>
+      </span>
+      TripMate AI
+    </a>
+    <button id="newTripBtn" class="ghost-btn" type="button" onclick="newTrip()">New trip</button>
+  </header>
 
-  <main class="app-container">
-    <section class="hero-section">
-      <div class="badge">
-        ✈️ Trip AI
-      </div>
-      <h1>Plan Your Perfect Trip with AI</h1>
-      <p>
-        Search flights, discover hotels, check weather, assess your budget,
-        and review the AI-generated draft before the final itinerary is created.
-      </p>
+  <main class="shell">
+    <section class="hero">
+      <h1>Where to next?</h1>
+      <p>Describe your trip and get a draft with flights, hotels, weather and budget. You review it before the final plan is made.</p>
     </section>
 
-    <section class="planner-card">
-      <div class="card-header">
-        <div>
-          <h2>Where do you want to go?</h2>
-          <p>
-            Example: Plan a complete 7 days Japan trip from Bangladesh under 2 lakhs.
-          </p>
-        </div>
-        <div class="status-pill">
-          <span class="status-dot"></span>
-          Online
-        </div>
-      </div>
-
-      <div class="input-area">
-        <textarea
-          id="userInput"
-          placeholder="Plan a complete 7 days Japan trip including flights, hotels and sightseeing under 2 lakhs..."
-        ></textarea>
-        <button id="sendBtn" onclick="sendMessage()">
-          <span id="btnText">Generate Draft</span>
-          <span id="btnLoader" class="loader hidden"></span>
-        </button>
-      </div>
-
-      <div class="quick-prompts">
-        <button onclick="setPrompt('Plan a complete 7 days Japan trip from Bangladesh including flights, hotels and sightseeing under 2 lakhs.')">
-          Japan Trip
-        </button>
-        <button onclick="setPrompt('Plan a 5 days Dubai trip from Dhaka with flights, hotels and sightseeing.')">
-          Dubai Trip
-        </button>
-        <button onclick="setPrompt('Plan a 7 days Thailand trip from Bangladesh with budget hotels and sightseeing.')">
-          Thailand Trip
-        </button>
-        <button onclick="setPrompt('Give me all country flight info.')">
-          Global Flights
+    <section class="composer" aria-label="Trip request">
+      <label for="userInput" class="sr-only">Your travel request</label>
+      <textarea
+        id="userInput"
+        placeholder="Plan a complete 7 days Japan trip including flights, hotels and sightseeing under 2 lakhs..."
+      ></textarea>
+      <div class="composer-footer">
+        <span class="hint">Ctrl + Enter to send</span>
+        <button id="sendBtn" class="primary-btn" type="button" onclick="sendMessage()">
+          <span id="btnText">Generate draft</span>
+          <span id="btnLoader" class="loader hidden" aria-hidden="true"></span>
         </button>
       </div>
     </section>
 
-    <section id="workflowSection" class="workflow-section hidden">
+    <div class="quick-prompts">
+      <span class="quick-label">Try</span>
+      <button type="button" onclick="setPrompt('Plan a complete 7 days Japan trip from Bangladesh including flights, hotels and sightseeing under 2 lakhs.')">Japan trip</button>
+      <button type="button" onclick="setPrompt('Plan a 5 days Dubai trip from Dhaka with flights, hotels and sightseeing.')">Dubai trip</button>
+      <button type="button" onclick="setPrompt('Plan a 7 days Thailand trip from Bangladesh with budget hotels and sightseeing.')">Thailand trip</button>
+      <button type="button" onclick="setPrompt('Give me all country flight info.')">Global flights</button>
+    </div>
+
+    <div id="loadingNote" class="loading-note hidden" role="status" aria-live="polite">
+      <span class="loader dark" aria-hidden="true"></span>
+      <span id="loadingText">Building your draft...</span>
+    </div>
+
+    <section id="errorBox" class="error-box hidden" role="alert"></section>
+
+    <section id="workflowSection" class="card workflow hidden" aria-label="Execution plan">
       <div class="workflow-header">
-        <div>
-          <span class="eyebrow">Supervisor Agent</span>
-          <h2>Execution Plan</h2>
-        </div>
+        <h2>Execution plan</h2>
         <span id="guardrailBadge" class="guardrail-badge">Guardrail passed</span>
       </div>
-      <p id="supervisorReasoning" class="supervisor-reasoning"></p>
       <div id="agentChips" class="agent-chips"></div>
+      <p id="supervisorReasoning" class="supervisor-reasoning"></p>
     </section>
 
-    <section id="resultSection" class="result-section hidden">
+    <section id="resultSection" class="result hidden" aria-label="Travel plan">
       <div class="result-header">
         <div>
-          <h2 id="resultTitle">Your AI Travel Plan</h2>
-          <p id="threadInfo">Thread ID: -</p>
+          <h2 id="resultTitle">Your AI travel plan</h2>
+          <p id="threadInfo" class="thread-info">Thread ID: -</p>
         </div>
         <div class="result-actions">
-          <button class="copy-btn" onclick="copyResult()">Copy</button>
-          <button class="download-btn" onclick="downloadPDF()">Download PDF</button>
+          <button class="copy-btn" type="button" onclick="copyResult()">Copy</button>
+          <button class="download-btn" type="button" onclick="downloadPDF()">Download PDF</button>
         </div>
       </div>
 
-      <div id="pdfContent" class="pdf-content">
+      <article id="pdfContent" class="pdf-content">
         <h1 class="pdf-title">AI Travel Plan</h1>
         <div id="resultBox" class="result-box"></div>
-      </div>
+      </article>
     </section>
 
-    <section id="approvalSection" class="approval-section hidden">
-      <div class="approval-icon">👤</div>
-      <div class="approval-content">
-        <span class="eyebrow">Human-in-the-Loop</span>
-        <h2>Review the draft itinerary</h2>
-        <p id="approvalRequest">
-          Approve the draft or provide feedback before the final plan is generated.
-        </p>
+    <section id="approvalSection" class="card approval hidden" aria-label="Review draft">
+      <h2>Review the draft</h2>
+      <p id="approvalRequest">Approve the draft or provide feedback before the final plan is generated.</p>
 
-        <textarea
-          id="approvalFeedback"
-          class="feedback-input"
-          placeholder="Add revision feedback, for example: reduce the hotel cost and add one free day..."
-        ></textarea>
+      <label for="approvalFeedback" class="sr-only">Revision feedback</label>
+      <textarea
+        id="approvalFeedback"
+        class="feedback-input"
+        placeholder="Optional for approval. Required for changes, for example: reduce the hotel cost and add one free day..."
+      ></textarea>
 
-        <div class="approval-actions">
-          <button id="approveBtn" class="approve-btn" onclick="submitApproval(true)">
-            Approve & Generate Final
-          </button>
-          <button id="reviseBtn" class="revise-btn" onclick="submitApproval(false)">
-            Revise Using Feedback
-          </button>
-        </div>
+      <div class="approval-actions">
+        <button id="approveBtn" class="approve-btn" type="button" onclick="submitApproval(true)">Approve and generate final</button>
+        <button id="reviseBtn" class="revise-btn" type="button" onclick="submitApproval(false)">Revise with feedback</button>
       </div>
     </section>
-
-    <section id="errorBox" class="error-box hidden"></section>
   </main>
 
   <footer>
     Built with FastAPI, LangGraph, Groq, PostgreSQL, Tavily, AviationStack and MCP
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="/static/script.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
+  <script src="/static/script.js" defer></script>
 </body>
 </html>
